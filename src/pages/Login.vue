@@ -7,7 +7,10 @@
     <div class="container-fluid">
       <div class="row">
         <div class="col text-center">
-          <button class="btn btn-outline-danger btn-lg">
+          <button
+            @click="loginWithGoogle"
+            class="btn btn-outline-danger btn-lg"
+          >
             Googleでログイン
           </button>
         </div>
@@ -24,8 +27,20 @@
 </template>
 
 <script>
+import auth from 'firebase/auth'
+
 export default {
   name: 'login',
+  methods: {
+    loginWithGoogle() {
+      firebase
+        .auth()
+        .signInWithPopup(new firebase.auth.GoogleAuthProvider())
+        .then(response => {
+          console.log(response.user)
+        })
+    },
+  },
 }
 </script>
 
