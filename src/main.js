@@ -5,6 +5,7 @@ import App from './App'
 import router from './router'
 import firebase from 'firebase/app'
 import store from './store'
+import auth from 'firebase/auth'
 
 var firebaseConfig = {
   apiKey: 'AIzaSyCLMRFvB85yWCo5GRoCeBuQInsHa2fuABQ',
@@ -19,13 +20,16 @@ var firebaseConfig = {
 firebase.initializeApp(firebaseConfig)
 window.firebase = firebase
 
-Vue.config.productionTip = false
+const unsubscribe = firebase.auth().onAuthStateChanged(user => {
+  store.dispatch('setUser', user)
 
-/* eslint-disable no-new */
-new Vue({
-  el: '#app',
-  router,
-  store,
-  components: { App },
-  template: '<App/>',
+  new Vue({
+    el: '#app',
+    router,
+    store,
+    components: { App },
+    template: '<App/>',
+  })
+
+  unsubscribe()
 })

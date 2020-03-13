@@ -9,10 +9,18 @@ const state = {
 }
 
 // Mutations
-const mutations = {}
+const mutations = {
+  SET_USER(state, user) {
+    state.currentUser = user
+  },
+}
 
 // actions
-const actions = {}
+const actions = {
+  setUser(state, user) {
+    state.commit('SET_USER', user)
+  },
+}
 
 // getter
 const getters = {

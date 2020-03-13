@@ -4,6 +4,14 @@
       <h2>#SLACK#</h2>
       <p>チャットをはじめよう</p>
     </div>
+    <div v-if="loading" class="alert alert-info">Loading...</div>
+
+    <div v-if="hasErrors" class="alert alert-danger">
+      <div v-for="err in errors" :key="err.id">
+        {{ err }}
+      </div>
+    </div>
+
     <div class="container-fluid">
       <div class="row">
         <div class="col text-center">
@@ -31,20 +39,41 @@ import auth from 'firebase/auth'
 
 export default {
   name: 'login',
+
+  data() {
+    return {
+      errors: [],
+      loading: false,
+    }
+  },
+
+  computed: {
+    hasErrors() {
+      return this.errors.length > 0
+    },
+  },
+
   methods: {
     loginWithGoogle() {
+      this.loading = true
+      this.errors = []
+
       firebase
         .auth()
         .signInWithPopup(new firebase.auth.GoogleAuthProvider())
         .then(response => {
-          console.log(response.user)
+          // ログインユーザーをStoreへDispatch
+          this.$store.dispatch('setUser', response.user)
+          // ログインが成功したらrootページへ遷移させる
+          this.$router.push('/')
+        })
+        .catch(err => {
+          this.errors.push(err.message)
+          this.loading = false
         })
     },
   },
 }
 </script>
 
-<style scoped>
-.btn {
-}
-</style>
+<style scoped></style>
