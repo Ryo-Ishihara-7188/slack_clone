@@ -4,6 +4,7 @@ import Vue from 'vue'
 import App from './App'
 import router from './router'
 import firebase from 'firebase/app'
+import store from './store'
 
 var firebaseConfig = {
   apiKey: 'AIzaSyCLMRFvB85yWCo5GRoCeBuQInsHa2fuABQ',
@@ -24,6 +25,7 @@ Vue.config.productionTip = false
 new Vue({
   el: '#app',
   router,
+  store,
   components: { App },
   template: '<App/>',
 })
