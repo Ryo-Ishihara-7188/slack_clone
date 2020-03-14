@@ -2,7 +2,7 @@
   <div>
     <div class="container-fluid">
       <div class="row">
-        <div class="col-md-4 sidebar">
+        <div class="col-md-4 bg-danger sidebar">
           <sidebar></sidebar>
         </div>
         <div class="col-md-8 content">
@@ -33,7 +33,6 @@ export default {
   float: left;
   position: fixed;
   height: 100%;
-  background: #000;
   padding-top: 2em;
   overflow: scroll;
 }

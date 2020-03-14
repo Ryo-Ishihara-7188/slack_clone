@@ -1,7 +1,7 @@
 <template>
   <div>
     <h2 class="text-light">#SLACK#</h2>
-    <hr style="border: 1px solid #333" />
+    <hr style="border: 0.5px solid #fff" />
     <span>
       <img
         class="rounded-circle mr-2"
@@ -10,17 +10,25 @@
       />
       <span class="text-light">{{ currentUser.displayName }}</span>
     </span>
-    <hr style="border: 1px solid #333" />
-    <button @click="logout" class="btn btn-outline-light">Logout</button>
+    <hr style="border: 0.5px solid #fff" />
+    <button @click="logout" class="btn btn-outline-light">ログアウト</button>
+
+    <hr style="border: 0.5px solid #fff" />
+    <channel></channel>
   </div>
 </template>
 
 <script>
+import Channel from './Channel'
 import auth from 'firebase/auth'
 import { mapGetters } from 'vuex'
 
 export default {
   name: 'sidebar',
+
+  components: {
+    Channel,
+  },
 
   computed: {
     ...mapGetters(['currentUser']),
