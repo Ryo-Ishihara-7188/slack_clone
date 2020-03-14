@@ -36,7 +36,8 @@
 
 <script>
 import auth from 'firebase/auth'
-
+import database from 'firebase/database'
+ 
 export default {
   name: 'login',
 
@@ -44,6 +45,7 @@ export default {
     return {
       errors: [],
       loading: false,
+      usersRef: firebase.database().ref('users'),
     }
   },
 
@@ -62,6 +64,8 @@ export default {
         .auth()
         .signInWithPopup(new firebase.auth.GoogleAuthProvider())
         .then(response => {
+          // Real time database にユーザーを保存
+          this.saveUserToUsersRef(response.user)
           // ログインユーザーをStoreへDispatch
           this.$store.dispatch('setUser', response.user)
           // ログインが成功したらrootページへ遷移させる
@@ -71,6 +75,13 @@ export default {
           this.errors.push(err.message)
           this.loading = false
         })
+    },
+
+    saveUserToUsersRef(user) {
+      return this.usersRef.child(user.uid).set({
+        name: user.displayName,
+        avatar: user.photoURL,
+      })
     },
   },
 }
