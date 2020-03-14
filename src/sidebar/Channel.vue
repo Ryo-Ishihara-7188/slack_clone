@@ -23,6 +23,7 @@
             <form>
               <div class="form-group">
                 <input
+                  v-model="new_channel"
                   type="text"
                   id="new_channel"
                   name="new_channel"
@@ -30,6 +31,15 @@
                   class="form-control"
                 />
               </div>
+              <ul v-if="hasErrors" class="list-group">
+                <li
+                  v-for="err in errors"
+                  :key="err.index"
+                  class="list-group-item text-danger"
+                >
+                  {{ err }}
+                </li>
+              </ul>
             </form>
           </div>
           <div class="modal-footer">
@@ -38,9 +48,11 @@
               class="btn btn-secondary"
               data-dismiss="modal"
             >
-              Close
+              閉じる
             </button>
-            <button type="button" class="btn btn-primary">Save changes</button>
+            <button @click="addChannel" type="button" class="btn btn-primary">
+              追加
+            </button>
           </div>
         </div>
       </div>
@@ -49,14 +61,47 @@
 </template>
 
 <script>
+import database from 'firebase/database'
+
 export default {
   name: 'channel',
+
+  data() {
+    return {
+      new_channel: '',
+      errors: [],
+      channelsRef: firebase.database().ref('channels'),
+    }
+  },
+
+  computed: {
+    hasErrors() {
+      return this.errors.length > 0
+    },
+  },
 
   methods: {
     openModal() {
       $('#channelModal')
         .appendTo('body')
         .modal('show')
+    },
+    addChannel() {
+      // チャンネルのユニークキーを生成
+      let key = this.channelsRef.push().key
+      let newChannel = { id: key, name: this.new_channel }
+      // チャンネルをDBに保存
+      this.channelsRef
+        .child(key)
+        .update(newChannel)
+        .then(() => {
+          this.new_channel = ''
+          $('#channelModal').modal('hide')
+        })
+        .catch(err => {
+          console.log(err.message)
+          this.errors.push(err.message)
+        })
     },
   },
 }
