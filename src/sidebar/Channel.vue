@@ -4,6 +4,34 @@
       チャンネルを追加
     </button>
 
+    <div class="mt-4">
+      <div class="text-white">・チャンネル</div>
+      <ul>
+        <li
+          v-for="channel in channels"
+          :key="channel.index"
+          @click="changeChannel(channel)"
+          class="text-white"
+          style="cursor:pointer"
+          :class="{
+            'text-info font-weight-bold': setActiveChannel(channel),
+            'font-weight-light': !setActiveChannel(channel),
+          }"
+        >
+          {{ channel.name }}
+        </li>
+      </ul>
+      <!-- <button
+        v-for="channel in channels"
+        :key="channel.index"
+        class="list-group-item list-group-item-action"
+        type="button"
+        :class="{ active: setActiveChannel(channel) }"
+      >
+        {{ channel.name }}
+      </button> -->
+    </div>
+
     <!-- Modal -->
     <div class="modal fade" id="channelModal">
       <div class="modal-dialog modal-dialog-center" role="document">
@@ -62,6 +90,7 @@
 
 <script>
 import database from 'firebase/database'
+import { mapGetters } from 'vuex'
 
 export default {
   name: 'channel',
@@ -71,10 +100,14 @@ export default {
       new_channel: '',
       errors: [],
       channelsRef: firebase.database().ref('channels'),
+      channels: [], // 登録済みチャンネル一覧
+      channel: null,
     }
   },
 
   computed: {
+    ...mapGetters(['currentChannel']),
+
     hasErrors() {
       return this.errors.length > 0
     },
@@ -87,6 +120,7 @@ export default {
         .modal('show')
     },
     addChannel() {
+      this.errors = []
       // チャンネルのユニークキーを生成
       let key = this.channelsRef.push().key
       let newChannel = { id: key, name: this.new_channel }
@@ -103,6 +137,35 @@ export default {
           this.errors.push(err.message)
         })
     },
+    addListeners() {
+      this.channelsRef.on('child_added', snapshot => {
+        // チャンネル一覧を取得
+        this.channels.push(snapshot.val())
+        // アクティブチャンネルの初期値をセット
+        if (this.channels.length > 0) {
+          this.channel = this.channels[0]
+          this.$store.dispatch('setCurrentChannel', this.channel)
+        }
+      })
+    },
+    setActiveChannel(channel) {
+      return channel.id === this.currentChannel.id
+    },
+    changeChannel(channel) {
+      this.$store.dispatch('setCurrentChannel', channel)
+    },
+    detachListeners() {
+      this.channelsRef.off()
+    },
+  },
+
+  // ライフサイクルフック
+  mounted() {
+    this.addListeners()
+  },
+
+  beforeDestroy() {
+    this.detachListeners()
   },
 }
 </script>
