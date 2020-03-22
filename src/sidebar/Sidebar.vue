@@ -15,11 +15,16 @@
 
     <hr style="border: 0.5px solid #fff" />
     <channel></channel>
+
+    <hr style="border: 0.5px solid #fff" />
+    <users></users>
+
   </div>
 </template>
 
 <script>
 import Channel from './Channel'
+import Users from './Users'
 import auth from 'firebase/auth'
 import { mapGetters } from 'vuex'
 
@@ -28,6 +33,7 @@ export default {
 
   components: {
     Channel,
+    Users,
   },
 
   computed: {
