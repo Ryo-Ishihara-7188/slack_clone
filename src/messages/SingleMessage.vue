@@ -10,9 +10,11 @@
         />
         <div class="media-body">
           <h6 class="mt-0">
-            <a href="#">{{ msg.user.name }}</a> - {{ msg.timestamp }}
+            <a href="#">{{ msg.user.name }}</a> - {{ msg.timestamp | fromNow }}
           </h6>
-          <p>{{ msg.content }}</p>
+          <p :class="{ self_message: selfMessage(msg.user) }">
+            {{ msg.content }}
+          </p>
         </div>
       </div>
     </div>
@@ -20,8 +22,34 @@
 </template>
 
 <script>
+import moment from 'moment'
+import { mapGetters } from 'vuex'
+
 export default {
   name: 'single-message',
   props: ['messages'],
+
+  computed: {
+    ...mapGetters(['currentUser']),
+  },
+
+  methods: {
+    selfMessage(user) {
+      return user.id === this.currentUser.uid
+    },
+  },
+
+  filters: {
+    fromNow(value) {
+      return moment(value).fromNow()
+    },
+  },
 }
 </script>
+
+<style scoped>
+  .self_message {
+    border-left: 5px solid saddlebrown;
+    padding: 0 10px;
+  }
+</style>
