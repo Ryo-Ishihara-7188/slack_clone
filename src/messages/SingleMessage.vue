@@ -1,5 +1,5 @@
 <template>
-  <div class="mt-3">
+  <div class="mt-3 mb-5">
     <div v-for="msg in messages" :key="msg.index">
       <div class="media">
         <img

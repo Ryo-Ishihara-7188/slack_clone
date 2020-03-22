@@ -46,6 +46,10 @@ export default {
         .child(this.currentChannel.id)
         .on('child_added', snapshot => {
           this.messages.push(snapshot.val())
+
+          this.$nextTick(() => {
+            $('html, body').scrollTop($(document).height())
+          })
         })
     },
 
