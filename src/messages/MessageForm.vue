@@ -62,7 +62,8 @@ export default {
 
       if (this.currentChannel !== null) {
         if (this.message.length > 0) {
-          this.$parent.messagesRef
+          console.log(this.$parent)
+          this.$parent.getMsgRef()
             .child(this.currentChannel.id)
             .push()
             .set(newMessage)

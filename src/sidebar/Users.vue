@@ -7,11 +7,7 @@
           v-for="user in users"
           :key="user.index"
           @click.prevent="changeChannel(user)"
-          class="text-white"
           style="cursor:pointer"
-          :class="{
-            active: isActive(user),
-          }"
         >
           <span
             :class="{
@@ -23,10 +19,11 @@
 
           <span>
             <img :src="user.avatar" class="img rounded-circle" height="20" />
-            <span>
-              <a :class="{ 'text-light': isActive(user) }" href="#">
-                {{ user.name }}
-              </a>
+            <!-- <span> -->
+            <span :class="{ 'text-info font-weight-bold': isActive(user) }">
+              <!-- <a :class="{ 'text-light': isActive(user) }" href="#"> -->
+              {{ user.name }}
+              <!-- </a> -->
             </span>
           </span>
         </li>
@@ -117,7 +114,7 @@ export default {
     },
 
     isActive(user) {
-      let channelId = this.getChannelId(user.id)
+      let channelId = this.getChannelId(user.uid)
       return this.currentChannel.id === channelId
     },
 
