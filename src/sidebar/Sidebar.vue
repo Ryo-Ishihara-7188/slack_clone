@@ -18,7 +18,6 @@
 
     <hr style="border: 0.5px solid #fff" />
     <users></users>
-
   </div>
 </template>
 
@@ -27,6 +26,7 @@ import Channel from './Channel'
 import Users from './Users'
 import auth from 'firebase/auth'
 import { mapGetters } from 'vuex'
+import database from 'firebase/database'
 
 export default {
   name: 'sidebar',
@@ -36,12 +36,19 @@ export default {
     Users,
   },
 
+  data() {
+    return {
+      presenceRef: firebase.database().ref('presence'),
+    }
+  },
+
   computed: {
     ...mapGetters(['currentUser']),
   },
 
   methods: {
     logout() {
+      this.presenceRef.child(this.currentUser.uid).remove()
       firebase.auth().signOut()
       this.$store.dispatch('setUser', null)
       this.$router.push('/login')
