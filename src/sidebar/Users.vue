@@ -3,16 +3,31 @@
     <div class="text-light">
       <h4>Users</h4>
       <ul class="nav flex-column">
-        <li v-for="user in users" :key="user.uid">
+        <li
+          v-for="user in users"
+          :key="user.index"
+          @click.prevent="changeChannel(user)"
+          class="text-white"
+          style="cursor:pointer"
+          :class="{
+            active: isActive(user),
+          }"
+        >
+          <span
+            :class="{
+              'fa fa-circle online': isOnline(user),
+              'fa fa-circle offline': !isOnline(user),
+            }"
+          >
+          </span>
+
           <span>
             <img :src="user.avatar" class="img rounded-circle" height="20" />
-            <span
-              :class="{
-                'text-primary': isOnline(user),
-                'text-danger': !isOnline(user),
-              }"
-              >{{ user.name }}</span
-            >
+            <span>
+              <a :class="{ 'text-light': isActive(user) }" href="#">
+                {{ user.name }}
+              </a>
+            </span>
           </span>
         </li>
       </ul>
@@ -37,7 +52,7 @@ export default {
   },
 
   computed: {
-    ...mapGetters(['currentUser']),
+    ...mapGetters(['currentUser', 'currentChannel']),
   },
 
   methods: {
@@ -93,6 +108,24 @@ export default {
       this.presenceRef.off()
       this.connectedRef.off()
     },
+
+    changeChannel(user) {
+      let channelId = this.getChannelId(user.uid)
+      let channel = { id: channelId, name: user.name }
+      this.$store.dispatch('setPrivate', true)
+      this.$store.dispatch('setCurrentChannel', channel)
+    },
+
+    isActive(user) {
+      let channelId = this.getChannelId(user.id)
+      return this.currentChannel.id === channelId
+    },
+
+    getChannelId(userId) {
+      return userId < this.currentUser.uid
+        ? userId + '/' + this.currentUser.uid
+        : this.currentUser.uid + '/' + userId
+    },
   },
 
   mounted() {
@@ -104,3 +137,12 @@ export default {
   },
 }
 </script>
+
+<style scoped>
+.online {
+  color: seagreen;
+}
+.offline {
+  color: sienna;
+}
+</style>

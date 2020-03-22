@@ -21,15 +21,6 @@
           {{ channel.name }}
         </li>
       </ul>
-      <!-- <button
-        v-for="channel in channels"
-        :key="channel.index"
-        class="list-group-item list-group-item-action"
-        type="button"
-        :class="{ active: setActiveChannel(channel) }"
-      >
-        {{ channel.name }}
-      </button> -->
     </div>
 
     <!-- Modal -->
@@ -152,6 +143,7 @@ export default {
       return channel.id === this.currentChannel.id
     },
     changeChannel(channel) {
+      this.$store.dispatch('setPrivate', true)
       this.$store.dispatch('setCurrentChannel', channel)
     },
     detachListeners() {
