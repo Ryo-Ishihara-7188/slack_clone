@@ -12,9 +12,11 @@
           <h6 class="mt-0">
             <a href="#">{{ msg.user.name }}</a> - {{ msg.timestamp | fromNow }}
           </h6>
-          <p :class="{ self_message: selfMessage(msg.user) }">
+          <p v-if="!isFile(msg)" :class="{ self_message: selfMessage(msg.user) }">
             {{ msg.content }}
           </p>
+
+          <img v-else class="img img-responsive" height="200" :src="msg.image" alt="image">
         </div>
       </div>
     </div>
@@ -37,6 +39,10 @@ export default {
     selfMessage(user) {
       return user.id === this.currentUser.uid
     },
+
+    isFile(message) {
+      return message.content == null && message.image != null
+    },
   },
 
   filters: {
@@ -48,8 +54,8 @@ export default {
 </script>
 
 <style scoped>
-  .self_message {
-    border-left: 5px solid saddlebrown;
-    padding: 0 10px;
-  }
+.self_message {
+  border-left: 5px solid saddlebrown;
+  padding: 0 10px;
+}
 </style>

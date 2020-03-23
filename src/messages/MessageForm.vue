@@ -41,7 +41,7 @@
         </div>
       </form>
 
-      <file-modal ref='file_modal'></file-modal>
+      <file-modal ref="file_modal"></file-modal>
     </div>
   </div>
 </template>
@@ -91,16 +91,6 @@ export default {
 
   methods: {
     sendMessage() {
-      let newMessage = {
-        content: this.message,
-        timestamp: firebase.database.ServerValue.TIMESTAMP,
-        user: {
-          name: this.currentUser.displayName,
-          avatar: this.currentUser.photoURL,
-          id: this.currentUser.uid,
-        },
-      }
-
       if (this.currentChannel !== null) {
         if (this.message.length > 0) {
           console.log(this.$parent)
@@ -108,7 +98,7 @@ export default {
             .getMsgRef()
             .child(this.currentChannel.id)
             .push()
-            .set(newMessage)
+            .set(this.createMessage)
             .then(() => {
               this.$nextTick(() => {
                 $('html, body').scrollTop($(document).height())
@@ -121,6 +111,25 @@ export default {
           this.message = ''
         }
       }
+    },
+
+    createMessage(fileurl = null) {
+      let message = {
+        timestamp: firebase.database.ServerValue.TIMESTAMP,
+        user: {
+          name: this.currentUser.displayName,
+          avatar: this.currentUser.photoURL,
+          id: this.currentUser.uid,
+        },
+      }
+
+      if (fileurl == null) {
+        message['content'] = this.message
+      } else {
+        message['image'] = fileurl
+      }
+
+      return message
     },
 
     uploadFile(file, metadata) {
@@ -151,8 +160,29 @@ export default {
           // finished
           this.uploadState = 'done'
           this.$refs.file_modal.resetForm()
+
+          let fileUrl = this.uploadTask.snapshot.ref
+            .getDownloadURL()
+            .then(fileUrl => {
+              this.sendFileMessage(fileUrl, ref, pathToUpload)
+            })
         }
       )
+    },
+
+    sendFileMessage(fileUrl, ref, pathToUpload) {
+      ref
+        .child(pathToUpload)
+        .push()
+        .set(this.createMessage(fileUrl))
+        .then(() => {
+          this.$$nextTick(() => {
+            $('html, body').scrollTop($(document).height())
+          })
+        })
+        .catch(error => {
+          this.errors.push(error.message)
+        })
     },
 
     getPath() {
@@ -172,6 +202,13 @@ export default {
 
   mounted() {
     $('html, body').scrollTop($(document).height())
+  },
+
+  beforeDestroy() {
+    if (this.uploadTask !== null) {
+      this.uploadTask.cancel()
+      this.uploadTask = null
+    }
   },
 }
 </script>
