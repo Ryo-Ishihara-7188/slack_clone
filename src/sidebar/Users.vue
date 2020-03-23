@@ -23,6 +23,9 @@
             <span :class="{ 'text-info font-weight-bold': isActive(user) }">
               <!-- <a :class="{ 'text-light': isActive(user) }" href="#"> -->
               {{ user.name }}
+              <span v-if="getNotification(user) >= 1" class="float-right">{{
+                getNotification(user)
+              }}</span>
               <!-- </a> -->
             </span>
           </span>
@@ -34,6 +37,7 @@
 
 <script>
 import database from 'firebase/database'
+import mixin from '../mixins'
 import { mapGetters } from 'vuex'
 
 export default {
@@ -45,11 +49,24 @@ export default {
       usersRef: firebase.database().ref('users'),
       connectedRef: firebase.database().ref('.info/connected'),
       presenceRef: firebase.database().ref('presence'),
+      privateMessagesRef: firebase.database().ref('privateMessages'),
+      notifCount: [],
+      channel: null,
     }
   },
 
+  mixins: [mixin],
+
   computed: {
-    ...mapGetters(['currentUser', 'currentChannel']),
+    ...mapGetters(['currentUser', 'currentChannel', 'isPrivate']),
+  },
+
+  watch: {
+    isPrivate() {
+      if (!this.isPrivate) {
+        this.resetNotifications()
+      }
+    },
   },
 
   methods: {
@@ -67,12 +84,23 @@ export default {
       this.presenceRef.on('child_added', snapshot => {
         if (this.currentUser.uid !== snapshot.key) {
           this.addStatusToUser(snapshot.key)
+
+          let channelId = this.getChannelId(snapshot.key)
+          this.privateMessagesRef.child(channelId).on('value', snapshot => {
+            this.handleNotifications(
+              channelId,
+              this.currentChannel.id,
+              this.notifCount,
+              snapshot
+            )
+          })
         }
       })
 
       this.presenceRef.on('child_removed', snapshot => {
         if (this.currentUser.uid !== snapshot.key) {
           this.addStatusToUser(snapshot.key, false)
+          this.privateMessagesRef.child(this.getChannelId(snapshot.key)).off()
         }
       })
 
@@ -100,15 +128,54 @@ export default {
       return (user.status = 'online')
     },
 
+    getNotification(user) {
+      let channelId = this.getChannelId(user.uid)
+      let notif = 0
+
+      this.notifCount.forEach(el => {
+        if (el.id === channelId) {
+          notif = el.notif
+        }
+      })
+      return notif
+    },
+
+    resetNotifications(user = null) {
+      let channelId = null
+
+      if (user !== null) {
+        channelId = this.getChannelId(user.uid)
+      } else {
+        channelId = this.channel.id
+      }
+
+      let index = this.notifCount.findIndex(el => el.id === channelId)
+      if (index !== -1) {
+        this.notifCount[index].total = this.notifCount[index].lastKnownTotal
+        this.notifCount[index].notif = 0
+      }
+    },
+
     detachListeners() {
       this.usersRef.off()
       this.presenceRef.off()
       this.connectedRef.off()
+
+      this.channels.forEach(el => {
+        this.messagesRef.child(el.id).off()
+      })
     },
 
     changeChannel(user) {
+      if (this.channel === null) {
+        this.resetNotifications(user)
+      } else {
+        this.resetNotifications()
+      }
+
       let channelId = this.getChannelId(user.uid)
       let channel = { id: channelId, name: user.name }
+      this.channel = channel
       this.$store.dispatch('setPrivate', true)
       this.$store.dispatch('setCurrentChannel', channel)
     },

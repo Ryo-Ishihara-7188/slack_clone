@@ -94,12 +94,11 @@ export default {
     sendMessage() {
       if (this.currentChannel !== null) {
         if (this.message.length > 0) {
-          console.log(this.$parent)
           this.$parent
             .getMsgRef()
             .child(this.currentChannel.id)
             .push()
-            .set(this.createMessage)
+            .set(this.createMessage())
             .then(() => {
               this.$nextTick(() => {
                 $('html, body').scrollTop($(document).height())
@@ -129,7 +128,6 @@ export default {
       } else {
         message['image'] = fileurl
       }
-
       return message
     },
 

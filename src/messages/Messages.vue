@@ -54,7 +54,6 @@ export default {
   methods: {
     addListeners() {
       let ref = this.getMsgRef()
-
       ref.child(this.currentChannel.id).on('child_added', snapshot => {
         let message = snapshot.val()
         message['id'] = snapshot.key
@@ -89,8 +88,10 @@ export default {
 
     getMsgRef() {
       if (this.isPrivate) {
+        console.log('xxxxxxx')
         return this.privateMsgRef
       } else {
+        console.log('aaaaaaa')
         return this.messagesRef
       }
     },
