@@ -32,6 +32,7 @@
           <div class="input-group-append">
             <button
               @click.prevent="openFileModal"
+              :disabled="uploadState == 'uploading'"
               class="btn btn-dark mt-3"
               type="button"
             >
@@ -155,6 +156,7 @@ export default {
           this, errors.push(error.message)
           this.uploadState = 'error'
           this.uploadTask = null
+          this.$refs.file_modal.resetForm()
         },
         () => {
           // finished
